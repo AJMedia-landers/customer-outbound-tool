@@ -36,7 +36,7 @@ export const sendRecoveryByEmail = (
   email: string,
   startDate?: string
 ) =>
-  api.post("/checkout-campaign/recovery/send", {
+  api.post("/checkout-campaign/recovery/by-email", {
     email,
     ...(startDate && { startDate }),
   });
