@@ -1,7 +1,32 @@
 import { DataGrid, type GridColDef, type GridPaginationModel } from "@mui/x-data-grid";
-import { Chip } from "@mui/material";
+import { Chip, IconButton, Tooltip, Box } from "@mui/material";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import dayjs from "dayjs";
+import { useState, useCallback } from "react";
 import type { TrackingRecord } from "types";
+
+function CopyableCell({ value }: { value: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = useCallback(() => {
+    navigator.clipboard.writeText(value);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 1500);
+  }, [value]);
+
+  return (
+    <Box sx={{ display: "flex", alignItems: "center", width: "100%", overflow: "hidden" }}>
+      <Box sx={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap", flex: 1 }}>
+        {value}
+      </Box>
+      <Tooltip title={copied ? "Copied!" : "Copy"} arrow>
+        <IconButton size="small" onClick={handleCopy} sx={{ ml: 0.5, p: 0.25 }}>
+          <ContentCopyIcon sx={{ fontSize: 14 }} />
+        </IconButton>
+      </Tooltip>
+    </Box>
+  );
+}
 
 interface Props {
   records: TrackingRecord[];
@@ -13,9 +38,24 @@ interface Props {
 }
 
 const columns: GridColDef<TrackingRecord>[] = [
-  { field: "order_id", headerName: "Order ID", width: 110 },
-  { field: "email", headerName: "Email", width: 200 },
-  { field: "campaign_name", headerName: "Campaign", width: 150 },
+  {
+    field: "order_id",
+    headerName: "Order ID",
+    width: 130,
+    renderCell: ({ value }) => <CopyableCell value={value ?? ""} />,
+  },
+  {
+    field: "email",
+    headerName: "Email",
+    width: 220,
+    renderCell: ({ value }) => <CopyableCell value={value ?? ""} />,
+  },
+  {
+    field: "campaign_name",
+    headerName: "Campaign",
+    width: 170,
+    renderCell: ({ value }) => <CopyableCell value={value ?? ""} />,
+  },
   { field: "coupon_code", headerName: "Coupon", width: 110 },
   { field: "emails_sent", headerName: "Emails Sent", width: 100, type: "number" },
   { field: "order_status", headerName: "Status", width: 110 },
