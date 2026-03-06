@@ -7,7 +7,9 @@ import {
   Button,
   Alert,
 } from "@mui/material";
-import { useForm } from "react-hook-form";
+import { DatePicker } from "@mui/x-date-pickers/DatePicker";
+import dayjs, { type Dayjs } from "dayjs";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
@@ -36,6 +38,7 @@ export default function SendRecoveryDialog({ open, onClose }: Props) {
     register,
     handleSubmit,
     reset,
+    control,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -78,12 +81,22 @@ export default function SendRecoveryDialog({ open, onClose }: Props) {
             autoFocus
             margin="dense"
           />
-          <TextField
-            label="Start Date (MM/DD/YY)"
-            {...register("startDate")}
-            placeholder="MM/DD/YY"
-            fullWidth
-            margin="dense"
+          <Controller
+            name="startDate"
+            control={control}
+            render={({ field }) => (
+              <DatePicker
+                label="Start Date"
+                value={field.value ? dayjs(field.value, "MM/DD/YY") : null}
+                onChange={(val: Dayjs | null) =>
+                  field.onChange(val ? val.format("MM/DD/YY") : "")
+                }
+                format="MM/DD/YY"
+                slotProps={{
+                  textField: { fullWidth: true, margin: "dense" },
+                }}
+              />
+            )}
           />
         </DialogContent>
         <DialogActions sx={{ px: 3, pb: 2 }}>
