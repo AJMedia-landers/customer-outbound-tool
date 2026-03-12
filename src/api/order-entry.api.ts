@@ -97,3 +97,69 @@ export const getCampaignProducts = (campaignId: number) =>
 
 export const importOrder = (payload: OrderImportPayload) =>
   api.post<OrderImportResponse>("/checkout-campaign/orders/import", payload);
+
+// --- Order Entries List ---
+
+export interface OrderEntryRecord {
+  id: number;
+  user_id: number;
+  creator_name: string;
+  campaign_id: number;
+  campaign_name: string | null;
+  checkout_order_id: string | null;
+  order_status: string;
+  first_name: string;
+  last_name: string;
+  email_address: string;
+  phone_number: string | null;
+  offers: string | null;
+  coupon_code: string | null;
+  total_amount: string | null;
+  notes: string | null;
+  created_at: string;
+}
+
+export interface OrderEntriesFilters {
+  user_id?: number;
+  email?: string;
+  order_status?: string;
+  date_from?: string;
+  date_to?: string;
+  page: number;
+  limit: number;
+}
+
+export interface OrderEntriesResponse {
+  success: boolean;
+  records: OrderEntryRecord[];
+  total: number;
+  page: number;
+  totalPages: number;
+  limit: number;
+}
+
+export interface OrderEntryCreator {
+  id: number;
+  name: string;
+}
+
+export interface CreatorsResponse {
+  success: boolean;
+  creators: OrderEntryCreator[];
+}
+
+export const getOrderEntries = (filters: OrderEntriesFilters) => {
+  const params: Record<string, string> = {
+    page: String(filters.page),
+    limit: String(filters.limit),
+  };
+  if (filters.user_id) params.user_id = String(filters.user_id);
+  if (filters.email) params.email = filters.email;
+  if (filters.order_status) params.order_status = filters.order_status;
+  if (filters.date_from) params.date_from = filters.date_from;
+  if (filters.date_to) params.date_to = filters.date_to;
+  return api.get<OrderEntriesResponse>("/checkout-campaign/order-entries", { params });
+};
+
+export const getOrderEntryCreators = () =>
+  api.get<CreatorsResponse>("/checkout-campaign/order-entries/creators");

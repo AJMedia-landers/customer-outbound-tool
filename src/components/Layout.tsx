@@ -18,6 +18,7 @@ import { useAuth } from "context/AuthContext";
 const NAV_ITEMS = [
   { label: "Dashboard", path: "/" },
   { label: "Order Entry", path: "/order-entry" },
+  { label: "Order Entries", path: "/order-entries" },
 ];
 
 export default function Layout() {
