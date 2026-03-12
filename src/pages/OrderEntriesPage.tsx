@@ -107,11 +107,6 @@ export default function OrderEntriesPage() {
       ),
     },
     {
-      field: "creator_name",
-      headerName: "Created By",
-      width: 140,
-    },
-    {
       field: "campaign_name",
       headerName: "Campaign",
       width: 180,
@@ -140,6 +135,11 @@ export default function OrderEntriesPage() {
       headerName: "Coupon",
       width: 110,
       renderCell: (params) => params.value || "-",
+    },
+    {
+      field: "creator_name",
+      headerName: "Created By",
+      width: 140,
     },
     {
       field: "created_at",

@@ -322,8 +322,14 @@ export default function OrderEntryPage() {
     mutationFn: (data: FormData) => {
       const offersStr = buildOffersString();
 
+      const selectedCampaign = campaigns.find(
+        (c) => String(c.campaignId) === data.campaignId
+      );
+
       const payload: OrderImportPayload = {
         campaignId: Number(data.campaignId),
+        campaignName: selectedCampaign?.campaignName || undefined,
+        totalAmount: totals.grandTotal > 0 ? totals.grandTotal : undefined,
         firstName: data.firstName,
         lastName: data.lastName,
         emailAddress: data.emailAddress,

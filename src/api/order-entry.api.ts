@@ -79,6 +79,8 @@ export interface OrderImportPayload {
   offers?: string;
   couponCode?: string;
   notes?: string;
+  campaignName?: string;
+  totalAmount?: number;
 }
 
 export interface OrderImportResponse {
