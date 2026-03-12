@@ -10,6 +10,7 @@ import Layout from "components/Layout";
 import LoginPage from "pages/LoginPage";
 import SignupPage from "pages/SignupPage";
 import DashboardPage from "pages/DashboardPage";
+import OrderEntryPage from "pages/OrderEntryPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -34,6 +35,7 @@ export default function App() {
                 <Route element={<ProtectedRoute />}>
                   <Route element={<Layout />}>
                     <Route path="/" element={<DashboardPage />} />
+                    <Route path="/order-entry" element={<OrderEntryPage />} />
                   </Route>
                 </Route>
               </Routes>

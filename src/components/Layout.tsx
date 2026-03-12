@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import {
   AppBar,
   Toolbar,
@@ -10,16 +10,29 @@ import {
   Avatar,
   Box,
   Container,
+  Tabs,
+  Tab,
 } from "@mui/material";
 import { useAuth } from "context/AuthContext";
 
+const NAV_ITEMS = [
+  { label: "Dashboard", path: "/" },
+  { label: "Order Entry", path: "/order-entry" },
+];
+
 export default function Layout() {
   const { user, logout } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const initials = user
     ? `${user.first_name[0]}${user.last_name[0]}`.toUpperCase()
     : "";
+
+  const currentTab = NAV_ITEMS.findIndex(
+    (item) => item.path === location.pathname
+  );
 
   return (
     <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
@@ -54,6 +67,21 @@ export default function Layout() {
           </Menu>
         </Toolbar>
       </AppBar>
+      <Box sx={{ bgcolor: "background.paper", borderBottom: 1, borderColor: "divider" }}>
+        <Container maxWidth="xl">
+          <Tabs
+            value={currentTab === -1 ? 0 : currentTab}
+            onChange={(_, idx) => navigate(NAV_ITEMS[idx].path)}
+            sx={{
+              "& .MuiTab-root": { textTransform: "none", fontWeight: 600 },
+            }}
+          >
+            {NAV_ITEMS.map((item) => (
+              <Tab key={item.path} label={item.label} />
+            ))}
+          </Tabs>
+        </Container>
+      </Box>
       <Container maxWidth="xl" sx={{ py: 3, flex: 1 }}>
         <Outlet />
       </Container>
