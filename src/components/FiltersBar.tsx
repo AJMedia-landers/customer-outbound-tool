@@ -97,6 +97,25 @@ export default function FiltersBar({ filters, onFiltersChange }: Props) {
           <MenuItem value="false">No</MenuItem>
         </Select>
       </FormControl>
+      <FormControl size="small" sx={{ minWidth: 130 }}>
+        <InputLabel>Store</InputLabel>
+        <Select
+          label="Store"
+          value={filters.store_name ?? ""}
+          onChange={(e) =>
+            onFiltersChange({
+              ...filters,
+              store_name: e.target.value || undefined,
+              page: 1,
+            })
+          }
+        >
+          <MenuItem value="">All Stores</MenuItem>
+          <MenuItem value="Besyner">Besyner</MenuItem>
+          <MenuItem value="Gekko">Gekko</MenuItem>
+          <MenuItem value="Purvos">Purvos</MenuItem>
+        </Select>
+      </FormControl>
       <DatePicker
         label="From"
         value={filters.date_from ? dayjs(filters.date_from) : null}

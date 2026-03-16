@@ -48,6 +48,7 @@ export interface TrackingRecord {
   discount_percent: number;
   total_amount: string | null;
   checkout_url: string | null;
+  store_name: string | null;
   emails_sent: number;
   order_status: string;
   order_completed: boolean;
@@ -87,6 +88,7 @@ export interface RecoveryFilters {
   email?: string;
   completed?: string;
   coupon_used?: string;
+  store_name?: string;
   date_from?: string;
   date_to?: string;
   page: number;

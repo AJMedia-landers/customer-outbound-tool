@@ -56,6 +56,12 @@ const columns: GridColDef<TrackingRecord>[] = [
     width: 170,
     renderCell: ({ value }) => <CopyableCell value={value ?? ""} />,
   },
+  {
+    field: "store_name",
+    headerName: "Store",
+    width: 100,
+    renderCell: ({ value }) => value || "-",
+  },
   { field: "coupon_code", headerName: "Coupon", width: 110 },
   { field: "emails_sent", headerName: "Emails Sent", width: 100, type: "number" },
   { field: "order_status", headerName: "Status", width: 110 },
