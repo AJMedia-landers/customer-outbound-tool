@@ -12,11 +12,9 @@ import SendRecoveryDialog from "components/SendRecoveryDialog";
 import CheckCompletionsButton from "components/CheckCompletionsButton";
 import type { GridPaginationModel } from "@mui/x-data-grid";
 
-const ADMIN_EMAIL = "ivan.plametiuk@ajmedia.io";
-
 export default function DashboardPage() {
   const { user } = useAuth();
-  const isAdmin = user?.email === ADMIN_EMAIL;
+  const isAdmin = user?.role === 'admin';
   const [filters, setFilters] = useState<RecoveryFilters>({
     page: 1,
     limit: 50,
