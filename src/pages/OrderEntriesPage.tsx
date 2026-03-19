@@ -11,16 +11,21 @@ import {
   IconButton,
   Tooltip,
   Chip,
+  Button,
+  Snackbar,
+  Alert,
 } from "@mui/material";
 import ClearIcon from "@mui/icons-material/Clear";
+import SendIcon from "@mui/icons-material/Send";
 import { DataGrid, type GridColDef } from "@mui/x-data-grid";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs, { type Dayjs } from "dayjs";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "context/AuthContext";
 import {
   getOrderEntries,
   getOrderEntryCreators,
+  sendInvoice,
 } from "api/order-entry.api";
 import type { OrderEntriesFilters } from "api/order-entry.api";
 
@@ -33,10 +38,38 @@ const STATUS_COLORS: Record<string, "warning" | "success" | "error" | "info" | "
 export default function OrderEntriesPage() {
   const { user } = useAuth();
   const isAdmin = user?.role === "admin" || user?.role === "super-admin";
+  const queryClient = useQueryClient();
 
   const [filters, setFilters] = useState<OrderEntriesFilters>({
     page: 1,
     limit: 25,
+  });
+
+  const [snackbar, setSnackbar] = useState<{
+    open: boolean;
+    message: string;
+    severity: "success" | "error";
+  }>({ open: false, message: "", severity: "success" });
+
+  const [sendingId, setSendingId] = useState<number | null>(null);
+
+  const sendInvoiceMutation = useMutation({
+    mutationFn: (id: number) => sendInvoice(id),
+    onSuccess: (res) => {
+      setSnackbar({
+        open: true,
+        message: res.data.message || "Invoice sent successfully",
+        severity: "success",
+      });
+      queryClient.invalidateQueries({ queryKey: ["order-entries"] });
+      setSendingId(null);
+    },
+    onError: (error: any) => {
+      const msg =
+        error?.response?.data?.message || error?.message || "Failed to send invoice";
+      setSnackbar({ open: true, message: msg, severity: "error" });
+      setSendingId(null);
+    },
   });
 
   const [emailInput, setEmailInput] = useState("");
@@ -147,6 +180,38 @@ export default function OrderEntriesPage() {
       width: 170,
       valueFormatter: (value: string) =>
         value ? dayjs(value).format("MMM D, YYYY h:mm A") : "",
+    },
+    {
+      field: "actions",
+      headerName: "Actions",
+      width: 150,
+      sortable: false,
+      filterable: false,
+      renderCell: (params) => {
+        const isPending = params.row.order_status === "pending";
+        const isSending = sendingId === params.row.id;
+        return isPending ? (
+          <Button
+            size="small"
+            variant="contained"
+            startIcon={<SendIcon />}
+            disabled={isSending || sendInvoiceMutation.isPending}
+            onClick={() => {
+              setSendingId(params.row.id);
+              sendInvoiceMutation.mutate(params.row.id);
+            }}
+          >
+            {isSending ? "Sending..." : "Send"}
+          </Button>
+        ) : (
+          <Chip
+            label={params.row.invoice_number || "Sent"}
+            size="small"
+            color="success"
+            variant="outlined"
+          />
+        );
+      },
     },
   ];
 
@@ -280,6 +345,21 @@ export default function OrderEntriesPage() {
           },
         }}
       />
+
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={5000}
+        onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert
+          severity={snackbar.severity}
+          onClose={() => setSnackbar((s) => ({ ...s, open: false }))}
+          variant="filled"
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 }

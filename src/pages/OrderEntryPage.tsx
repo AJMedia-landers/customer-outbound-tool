@@ -226,7 +226,7 @@ export default function OrderEntryPage() {
     for (const p of products) {
       const qty = offerQtys[p.offerId] || 0;
       if (qty > 0) {
-        totalPrice += qty * parseFloat(p.productPrice || "0");
+        totalPrice += qty * parseFloat(p.price || "0");
         totalShipping += qty * parseFloat(p.shippingPrice || "0");
       }
     }
@@ -275,7 +275,7 @@ export default function OrderEntryPage() {
     for (const p of products) {
       const qty = offerQtys[p.offerId] || 0;
       if (qty > 0) {
-        parts.push(`${p.offerId},${p.productId},${qty},${p.productPrice}`);
+        parts.push(`${p.offerId},${p.productId},${qty},${p.price}`);
       }
     }
     return parts.join(";");
@@ -675,7 +675,7 @@ export default function OrderEntryPage() {
                           </TableCell>
                           <TableCell align="center">
                             <TextField
-                              value={parseFloat(p.productPrice || "0").toFixed(2)}
+                              value={parseFloat(p.price || "0").toFixed(2)}
                               size="small"
                               InputProps={{ readOnly: true }}
                               inputProps={{ style: { textAlign: "center", width: 60, padding: "4px 8px" } }}

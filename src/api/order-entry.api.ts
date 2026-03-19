@@ -19,7 +19,7 @@ export interface CampaignProduct {
   campaignProductId: number;
   productId: number;
   productName: string;
-  productPrice: string;
+  price: string;
   productQty: number;
   shippingPrice: string;
   offerId: number;
@@ -117,6 +117,7 @@ export interface OrderEntryRecord {
   offers: string | null;
   coupon_code: string | null;
   total_amount: string | null;
+  invoice_number: string | null;
   notes: string | null;
   created_at: string;
 }
@@ -165,3 +166,16 @@ export const getOrderEntries = (filters: OrderEntriesFilters) => {
 
 export const getOrderEntryCreators = () =>
   api.get<CreatorsResponse>("/checkout-campaign/order-entries/creators");
+
+export interface SendInvoiceResponse {
+  success: boolean;
+  message: string;
+  data?: {
+    invoiceNumber: string;
+  };
+}
+
+export const sendInvoice = (orderEntryId: number) =>
+  api.post<SendInvoiceResponse>(
+    `/checkout-campaign/order-entries/${orderEntryId}/send-invoice`
+  );
