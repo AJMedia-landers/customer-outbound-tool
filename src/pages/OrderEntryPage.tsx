@@ -210,13 +210,19 @@ export default function OrderEntryPage() {
   const shippingProfiles: ShippingProfile[] = productsData?.shippingProfiles ?? [];
   const coupons: CampaignCoupon[] = productsData?.coupons ?? [];
 
+  const MAX_VISIBLE_PRODUCTS = 50;
+
   const filteredProducts = useMemo(() => {
-    if (!productSearch.trim()) return products;
-    const q = productSearch.toLowerCase();
-    return products.filter((p) => {
-      const name = (p.offerName || p.offerLabel || p.productName || "").toLowerCase();
-      return name.includes(q);
-    });
+    let result = products;
+    if (productSearch.trim()) {
+      const q = productSearch.toLowerCase();
+      result = products.filter((p) => {
+        const name = (p.offerName || p.offerLabel || p.productName || "").toLowerCase();
+        return name.includes(q);
+      });
+    }
+    // Limit rendered products to prevent browser freeze
+    return result.slice(0, MAX_VISIBLE_PRODUCTS);
   }, [products, productSearch]);
 
   // Compute totals
@@ -224,7 +230,7 @@ export default function OrderEntryPage() {
     let totalPrice = 0;
     let totalShipping = 0;
     for (const p of products) {
-      const qty = offerQtys[p.offerId] || 0;
+      const qty = offerQtys[p.campaignProductId] || 0;
       if (qty > 0) {
         totalPrice += qty * parseFloat(p.price || "0");
         totalShipping += qty * parseFloat(p.shippingPrice || "0");
@@ -269,13 +275,14 @@ export default function OrderEntryPage() {
     };
   }, [products, offerQtys, selectedShippingId, shippingProfiles, appliedCoupon]);
 
-  // Build offers string for API: offerId,productId,qty,price;...
+  // Build offers string: campaignProductId,productId,qty;...
+  // CheckoutChamp import uses campaignProductId, checkout URL uses campaignProductId.productId
   function buildOffersString(): string {
     const parts: string[] = [];
     for (const p of products) {
-      const qty = offerQtys[p.offerId] || 0;
+      const qty = offerQtys[p.campaignProductId] || 0;
       if (qty > 0) {
-        parts.push(`${p.offerId},${p.productId},${qty},${p.price}`);
+        parts.push(`${p.campaignProductId},${p.productId},${qty}`);
       }
     }
     return parts.join(";");
@@ -329,6 +336,7 @@ export default function OrderEntryPage() {
       const payload: OrderImportPayload = {
         campaignId: Number(data.campaignId),
         campaignName: selectedCampaign?.campaignName || undefined,
+        campaignCategoryName: selectedCampaign?.campaignCategoryName || undefined,
         totalAmount: totals.grandTotal > 0 ? totals.grandTotal : undefined,
         firstName: data.firstName,
         lastName: data.lastName,
@@ -348,7 +356,17 @@ export default function OrderEntryPage() {
         shippingId: selectedShippingId ? Number(selectedShippingId) : undefined,
       };
 
-      if (!data.sameAsShipping) {
+      if (data.sameAsShipping) {
+        // Copy billing address to shipping
+        payload.shipFirstName = data.firstName;
+        payload.shipLastName = data.lastName;
+        payload.shipAddress1 = data.address1;
+        payload.shipAddress2 = data.address2 || undefined;
+        payload.shipCity = data.city;
+        payload.shipState = data.state;
+        payload.shipCountry = data.country;
+        payload.shipPostalCode = data.postalCode;
+      } else {
         payload.shipFirstName = data.shipFirstName || undefined;
         payload.shipLastName = data.shipLastName || undefined;
         payload.shipAddress1 = data.shipAddress1 || undefined;
@@ -638,14 +656,14 @@ export default function OrderEntryPage() {
                   </TableHead>
                   <TableBody>
                     {filteredProducts.map((p) => {
-                      const qty = offerQtys[p.offerId] || 0;
+                      const qty = offerQtys[p.campaignProductId] || 0;
                       const displayName = p.offerName || p.offerLabel || p.productName || `Product ${p.productId}`;
                       return (
-                        <TableRow key={p.offerId ?? p.productId} hover>
+                        <TableRow key={p.campaignProductId ?? p.productId} hover>
                           <TableCell sx={{ fontSize: "0.85rem", fontStyle: "italic" }}>
                             {displayName}
                             {" "}
-                            <Tooltip title={`Product ID: ${p.productId}, Offer ID: ${p.offerId}`} arrow>
+                            <Tooltip title={`Product ID: ${p.productId}, Offer ID: ${p.campaignProductId}`} arrow>
                               <InfoOutlinedIcon sx={{ fontSize: 15, color: "#5ba3cf", verticalAlign: "middle", cursor: "pointer" }} />
                             </Tooltip>
                           </TableCell>
@@ -653,20 +671,20 @@ export default function OrderEntryPage() {
                             <Box sx={{ display: "inline-flex", alignItems: "center", gap: 0.5 }}>
                               <IconButton
                                 size="small"
-                                onClick={() => setQty(p.offerId, -1)}
+                                onClick={() => setQty(p.campaignProductId, -1)}
                                 sx={{ bgcolor: ORANGE, color: "#fff", width: 28, height: 28, "&:hover": { bgcolor: "#c95e00" } }}
                               >
                                 <RemoveIcon sx={{ fontSize: 16 }} />
                               </IconButton>
                               <TextField
                                 value={qty}
-                                onChange={(e) => setQtyDirect(p.offerId, parseInt(e.target.value, 10) || 0)}
+                                onChange={(e) => setQtyDirect(p.campaignProductId, parseInt(e.target.value, 10) || 0)}
                                 size="small"
                                 inputProps={{ style: { textAlign: "center", width: 36, padding: "4px 0" } }}
                               />
                               <IconButton
                                 size="small"
-                                onClick={() => setQty(p.offerId, 1)}
+                                onClick={() => setQty(p.campaignProductId, 1)}
                                 sx={{ bgcolor: ORANGE, color: "#fff", width: 28, height: 28, "&:hover": { bgcolor: "#c95e00" } }}
                               >
                                 <AddIcon sx={{ fontSize: 16 }} />
@@ -694,6 +712,11 @@ export default function OrderEntryPage() {
                     })}
                   </TableBody>
                 </Table>
+              {products.length > MAX_VISIBLE_PRODUCTS && !productSearch.trim() && (
+                <Typography variant="body2" sx={{ p: 1, textAlign: "center", color: "text.secondary" }}>
+                  Showing {MAX_VISIBLE_PRODUCTS} of {products.length} products. Use search to find more.
+                </Typography>
+              )}
               </TableContainer>
 
               {/* Coupon + Shipping + Totals */}

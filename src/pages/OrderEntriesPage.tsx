@@ -188,9 +188,8 @@ export default function OrderEntriesPage() {
       sortable: false,
       filterable: false,
       renderCell: (params) => {
-        const isPending = params.row.order_status === "pending";
         const isSending = sendingId === params.row.id;
-        return isPending ? (
+        return (
           <Button
             size="small"
             variant="contained"
@@ -203,13 +202,6 @@ export default function OrderEntriesPage() {
           >
             {isSending ? "Sending..." : "Send"}
           </Button>
-        ) : (
-          <Chip
-            label={params.row.invoice_number || "Sent"}
-            size="small"
-            color="success"
-            variant="outlined"
-          />
         );
       },
     },

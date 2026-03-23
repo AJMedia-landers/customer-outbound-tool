@@ -5,6 +5,7 @@ export interface Campaign {
   campaignName: string;
   campaignType: string;
   campaignStatus: string;
+  campaignCategoryName?: string;
   orderEntry: number;
   listSalesEntry: boolean | number | string;
 }
@@ -80,6 +81,7 @@ export interface OrderImportPayload {
   couponCode?: string;
   notes?: string;
   campaignName?: string;
+  campaignCategoryName?: string;
   totalAmount?: number;
 }
 
