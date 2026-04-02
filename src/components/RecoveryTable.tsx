@@ -62,9 +62,44 @@ const columns: GridColDef<TrackingRecord>[] = [
     width: 100,
     renderCell: ({ value }) => value || "-",
   },
-  { field: "coupon_code", headerName: "Coupon", width: 110 },
-  { field: "emails_sent", headerName: "Emails Sent", width: 100, type: "number" },
-  { field: "order_status", headerName: "Status", width: 110 },
+  {
+    field: "total_amount",
+    headerName: "Total Amount",
+    width: 120,
+    renderCell: ({ value }) =>
+      value ? `$${parseFloat(value).toFixed(2)}` : "-",
+  },
+  {
+    field: "order_status",
+    headerName: "Status",
+    width: 130,
+    renderCell: ({ value }) => {
+      const status = (value || "").toUpperCase();
+      const config: Record<string, { bg: string; color: string }> = {
+        COMPLETE: { bg: "#e8f5e9", color: "#2e7d32" },
+        PARTIAL: { bg: "#fff3e0", color: "#e65100" },
+        DECLINED: { bg: "#ffebee", color: "#c62828" },
+        REFUNDED: { bg: "#e3f2fd", color: "#1565c0" },
+        CANCELLED: { bg: "#f3e5f5", color: "#7b1fa2" },
+      };
+      const { bg, color } = config[status] ?? { bg: "#f5f5f5", color: "#616161" };
+      return (
+        <Chip
+          label={value || "-"}
+          size="medium"
+          sx={{
+            bgcolor: bg,
+            color,
+            fontWeight: 700,
+            fontSize: "0.8rem",
+            borderRadius: "8px",
+            minWidth: 100,
+            height: 30,
+          }}
+        />
+      );
+    },
+  },
   {
     field: "order_completed",
     headerName: "Completed",
@@ -72,9 +107,14 @@ const columns: GridColDef<TrackingRecord>[] = [
     renderCell: ({ value }) => (
       <Chip
         label={value ? "Yes" : "No"}
-        color={value ? "success" : "default"}
         size="small"
-        variant="outlined"
+        sx={{
+          bgcolor: value ? "#e8f5e9" : "#f5f5f5",
+          color: value ? "#2e7d32" : "#9e9e9e",
+          fontWeight: 600,
+          fontSize: "0.75rem",
+          borderRadius: "6px",
+        }}
       />
     ),
   },
@@ -85,9 +125,14 @@ const columns: GridColDef<TrackingRecord>[] = [
     renderCell: ({ value }) => (
       <Chip
         label={value ? "Yes" : "No"}
-        color={value ? "warning" : "default"}
         size="small"
-        variant="outlined"
+        sx={{
+          bgcolor: value ? "#fff3e0" : "#f5f5f5",
+          color: value ? "#e65100" : "#9e9e9e",
+          fontWeight: 600,
+          fontSize: "0.75rem",
+          borderRadius: "6px",
+        }}
       />
     ),
   },
@@ -131,7 +176,23 @@ export default function RecoveryTable({
       sx={{
         border: 1,
         borderColor: "divider",
-        "& .MuiDataGrid-cell": { py: 1 },
+        borderRadius: 2,
+        "& .MuiDataGrid-columnHeaders": {
+          bgcolor: "#fafafa",
+          fontWeight: 700,
+          fontSize: "0.8rem",
+          textTransform: "uppercase",
+          letterSpacing: "0.5px",
+          color: "#424242",
+        },
+        "& .MuiDataGrid-cell": {
+          py: 1,
+          fontSize: "0.85rem",
+        },
+        "& .MuiDataGrid-footerContainer": {
+          borderTop: "2px solid",
+          borderColor: "divider",
+        },
       }}
     />
   );

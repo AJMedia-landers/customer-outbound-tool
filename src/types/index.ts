@@ -26,10 +26,10 @@ export interface ProfileResponse {
 
 export interface TrackingStats {
   total_recovery_emails_sent: number;
-  unique_orders_tracked: number;
+  recovered_amount: string;
   orders_completed: number;
   coupons_used: number;
-  completion_rate_percent: string;
+  conversion_rate_percent: string;
   coupon_usage_rate_percent: string;
 }
 
