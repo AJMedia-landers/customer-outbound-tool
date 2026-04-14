@@ -164,9 +164,9 @@ export default function OrderEntriesPage() {
         params.value ? `$${parseFloat(params.value).toFixed(2)}` : "-",
     },
     {
-      field: "coupon_code",
+      field: "applied_coupon_code",
       headerName: "Coupon",
-      width: 110,
+      width: 160,
       renderCell: (params) => params.value || "-",
     },
     {
