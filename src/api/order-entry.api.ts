@@ -169,6 +169,34 @@ export const getOrderEntries = (filters: OrderEntriesFilters) => {
 export const getOrderEntryCreators = () =>
   api.get<CreatorsResponse>("/checkout-campaign/order-entries/creators");
 
+export interface OrderEntryUserStat {
+  user_id: number | null;
+  user_name: string;
+  email: string | null;
+  total_orders: number;
+  total_amount: string;
+}
+
+export interface OrderEntryUserStatsResponse {
+  success: boolean;
+  stats: OrderEntryUserStat[];
+}
+
+export interface UserStatsFilters {
+  date_from?: string;
+  date_to?: string;
+}
+
+export const getOrderEntryUserStats = (filters: UserStatsFilters) => {
+  const params: Record<string, string> = {};
+  if (filters.date_from) params.date_from = filters.date_from;
+  if (filters.date_to) params.date_to = filters.date_to;
+  return api.get<OrderEntryUserStatsResponse>(
+    "/checkout-campaign/order-entries/user-stats",
+    { params }
+  );
+};
+
 export interface SendInvoiceResponse {
   success: boolean;
   message: string;

@@ -15,10 +15,14 @@ import {
 } from "@mui/material";
 import { useAuth } from "context/AuthContext";
 
-const NAV_ITEMS = [
+const BASE_NAV_ITEMS = [
   { label: "Dashboard", path: "/" },
   { label: "Order Entry", path: "/order-entry" },
   { label: "Order Entries", path: "/order-entries" },
+];
+
+const ADMIN_NAV_ITEMS = [
+  { label: "User Stats", path: "/user-stats" },
 ];
 
 export default function Layout() {
@@ -31,7 +35,12 @@ export default function Layout() {
     ? `${user.first_name[0]}${user.last_name[0]}`.toUpperCase()
     : "";
 
-  const currentTab = NAV_ITEMS.findIndex(
+  const isAdmin = user?.role === "admin" || user?.role === "super-admin";
+  const navItems = isAdmin
+    ? [...BASE_NAV_ITEMS, ...ADMIN_NAV_ITEMS]
+    : BASE_NAV_ITEMS;
+
+  const currentTab = navItems.findIndex(
     (item) => item.path === location.pathname
   );
 
@@ -72,12 +81,12 @@ export default function Layout() {
         <Container maxWidth="xl">
           <Tabs
             value={currentTab === -1 ? 0 : currentTab}
-            onChange={(_, idx) => navigate(NAV_ITEMS[idx].path)}
+            onChange={(_, idx) => navigate(navItems[idx].path)}
             sx={{
               "& .MuiTab-root": { textTransform: "none", fontWeight: 600 },
             }}
           >
-            {NAV_ITEMS.map((item) => (
+            {navItems.map((item) => (
               <Tab key={item.path} label={item.label} />
             ))}
           </Tabs>

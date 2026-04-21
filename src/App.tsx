@@ -12,6 +12,7 @@ import SignupPage from "pages/SignupPage";
 import DashboardPage from "pages/DashboardPage";
 import OrderEntryPage from "pages/OrderEntryPage";
 import OrderEntriesPage from "pages/OrderEntriesPage";
+import UserStatsPage from "pages/UserStatsPage";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -38,6 +39,7 @@ export default function App() {
                     <Route path="/" element={<DashboardPage />} />
                     <Route path="/order-entry" element={<OrderEntryPage />} />
                     <Route path="/order-entries" element={<OrderEntriesPage />} />
+                    <Route path="/user-stats" element={<UserStatsPage />} />
                   </Route>
                 </Route>
               </Routes>
