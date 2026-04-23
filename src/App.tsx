@@ -9,6 +9,7 @@ import ProtectedRoute from "components/ProtectedRoute";
 import Layout from "components/Layout";
 import LoginPage from "pages/LoginPage";
 import SignupPage from "pages/SignupPage";
+import VerifyPage from "pages/VerifyPage";
 import DashboardPage from "pages/DashboardPage";
 import OrderEntryPage from "pages/OrderEntryPage";
 import OrderEntriesPage from "pages/OrderEntriesPage";
@@ -34,6 +35,7 @@ export default function App() {
               <Routes>
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/signup" element={<SignupPage />} />
+                <Route path="/verify" element={<VerifyPage />} />
                 <Route element={<ProtectedRoute />}>
                   <Route element={<Layout />}>
                     <Route path="/" element={<DashboardPage />} />

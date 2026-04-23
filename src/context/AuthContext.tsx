@@ -20,7 +20,8 @@ interface AuthState {
     last_name: string;
     email: string;
     password: string;
-  }) => Promise<void>;
+  }) => Promise<{ email: string; verification_required: boolean }>;
+  verifyEmail: (email: string, code: string) => Promise<void>;
   logout: () => void;
 }
 
@@ -67,14 +68,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       email: string;
       password: string;
     }) => {
+      // Signup no longer auto-logs-in — user must verify email first.
       const res = await authApi.signup(data);
-      const { user: u, token: t } = res.data.data;
-      localStorage.setItem("token", t);
-      setToken(t);
-      setUser(u);
+      return res.data.data;
     },
     []
   );
+
+  const verifyEmail = useCallback(async (email: string, code: string) => {
+    const res = await authApi.verifyEmail(email, code);
+    const { user: u, token: t } = res.data.data;
+    localStorage.setItem("token", t);
+    setToken(t);
+    setUser(u);
+  }, []);
 
   const logout = useCallback(() => {
     localStorage.removeItem("token");
@@ -91,6 +98,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         isAuthenticated: !!user,
         login,
         signup,
+        verifyEmail,
         logout,
       }}
     >

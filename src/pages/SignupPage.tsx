@@ -17,10 +17,18 @@ import { useAuth } from "context/AuthContext";
 import { AxiosError } from "axios";
 import type { ApiError } from "types";
 
+const ALLOWED_DOMAIN = "ajmedia.io";
+
 const schema = z.object({
   first_name: z.string().min(1, "First name is required"),
   last_name: z.string().min(1, "Last name is required"),
-  email: z.string().email("Valid email is required"),
+  email: z
+    .string()
+    .email("Valid email is required")
+    .refine(
+      (email) => email.split("@")[1]?.toLowerCase() === ALLOWED_DOMAIN,
+      `Only @${ALLOWED_DOMAIN} email addresses are allowed`
+    ),
   password: z
     .string()
     .min(8, "Password must be at least 8 characters")
@@ -47,8 +55,10 @@ export default function SignupPage() {
     setLoading(true);
     setError("");
     try {
-      await signup(data);
-      navigate("/", { replace: true });
+      const result = await signup(data);
+      navigate(`/verify?email=${encodeURIComponent(result.email)}`, {
+        replace: true,
+      });
     } catch (err) {
       const axiosErr = err as AxiosError<ApiError>;
       setError(axiosErr.response?.data?.message ?? "Signup failed");
@@ -106,7 +116,10 @@ export default function SignupPage() {
               margin="normal"
               {...register("email")}
               error={!!errors.email}
-              helperText={errors.email?.message}
+              helperText={
+                errors.email?.message ??
+                `Only @${ALLOWED_DOMAIN} email addresses are allowed`
+              }
             />
             <TextField
               label="Password"

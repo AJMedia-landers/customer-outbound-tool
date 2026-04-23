@@ -44,7 +44,15 @@ export default function LoginPage() {
       navigate("/", { replace: true });
     } catch (err) {
       const axiosErr = err as AxiosError<ApiError>;
-      setError(axiosErr.response?.data?.message ?? "Login failed");
+      const errData = axiosErr.response?.data;
+      if (errData?.data?.verification_required) {
+        navigate(
+          `/verify?email=${encodeURIComponent(errData.data.email || data.email)}`,
+          { replace: true }
+        );
+        return;
+      }
+      setError(errData?.message ?? "Login failed");
     } finally {
       setLoading(false);
     }

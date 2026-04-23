@@ -17,6 +17,20 @@ export interface AuthResponse {
   };
 }
 
+export interface SignupResponse {
+  success: boolean;
+  message: string;
+  data: {
+    email: string;
+    verification_required: boolean;
+  };
+}
+
+export interface ResendVerificationResponse {
+  success: boolean;
+  message: string;
+}
+
 export interface ProfileResponse {
   success: boolean;
   data: {
@@ -98,4 +112,8 @@ export interface RecoveryFilters {
 export interface ApiError {
   success: false;
   message: string;
+  data?: {
+    email?: string;
+    verification_required?: boolean;
+  };
 }
