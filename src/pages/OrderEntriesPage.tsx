@@ -14,9 +14,15 @@ import {
   Button,
   Snackbar,
   Alert,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogContentText,
+  DialogActions,
 } from "@mui/material";
 import ClearIcon from "@mui/icons-material/Clear";
 import SendIcon from "@mui/icons-material/Send";
+import ReplayIcon from "@mui/icons-material/Replay";
 import { DataGrid, type GridColDef } from "@mui/x-data-grid";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import dayjs, { type Dayjs } from "dayjs";
@@ -52,6 +58,7 @@ export default function OrderEntriesPage() {
   }>({ open: false, message: "", severity: "success" });
 
   const [sendingId, setSendingId] = useState<number | null>(null);
+  const [confirmResendId, setConfirmResendId] = useState<number | null>(null);
 
   const sendInvoiceMutation = useMutation({
     mutationFn: (id: number) => sendInvoice(id),
@@ -171,36 +178,49 @@ export default function OrderEntriesPage() {
     },
     {
       field: "creator_name",
-      headerName: "Created By",
-      width: 140,
+      headerName: "Agent",
+      width: 130,
     },
     {
       field: "created_at",
       headerName: "Created At",
-      width: 170,
+      width: 160,
       valueFormatter: (value: string) =>
         value ? dayjs(value).format("MMM D, YYYY h:mm A") : "",
     },
     {
       field: "actions",
       headerName: "Actions",
-      width: 150,
+      width: 110,
       sortable: false,
       filterable: false,
       renderCell: (params) => {
         const isSending = sendingId === params.row.id;
+        const alreadySent = Boolean(params.row.invoice_number);
+        const label = isSending
+          ? alreadySent
+            ? "Resending..."
+            : "Sending..."
+          : alreadySent
+            ? "Resend"
+            : "Send";
         return (
           <Button
             size="small"
             variant="contained"
-            startIcon={<SendIcon />}
+            color={alreadySent ? "warning" : "primary"}
+            startIcon={alreadySent ? <ReplayIcon /> : <SendIcon />}
             disabled={isSending || sendInvoiceMutation.isPending}
             onClick={() => {
-              setSendingId(params.row.id);
-              sendInvoiceMutation.mutate(params.row.id);
+              if (alreadySent) {
+                setConfirmResendId(params.row.id);
+              } else {
+                setSendingId(params.row.id);
+                sendInvoiceMutation.mutate(params.row.id);
+              }
             }}
           >
-            {isSending ? "Sending..." : "Send"}
+            {label}
           </Button>
         );
       },
@@ -337,6 +357,38 @@ export default function OrderEntriesPage() {
           },
         }}
       />
+
+      <Dialog
+        open={confirmResendId !== null}
+        onClose={() => setConfirmResendId(null)}
+        maxWidth="xs"
+        fullWidth
+      >
+        <DialogTitle>Resend invoice email?</DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            We have already sent the invoice email for this order. Are you sure
+            you want to resend it?
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setConfirmResendId(null)}>Cancel</Button>
+          <Button
+            variant="contained"
+            color="warning"
+            startIcon={<ReplayIcon />}
+            onClick={() => {
+              if (confirmResendId !== null) {
+                setSendingId(confirmResendId);
+                sendInvoiceMutation.mutate(confirmResendId);
+                setConfirmResendId(null);
+              }
+            }}
+          >
+            Resend
+          </Button>
+        </DialogActions>
+      </Dialog>
 
       <Snackbar
         open={snackbar.open}
